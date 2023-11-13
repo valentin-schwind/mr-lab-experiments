@@ -1,0 +1,163 @@
+{
+  "questionnaire_id": "0",
+  "page_background_color": [
+    "0.9245",
+    "0.9245",
+    "0.9245",
+    "0.8"
+  ],
+  "page_panel_color": [
+    "0.76",
+    "0.88",
+    "1",
+    "1"
+  ],
+  "highlight_color": [
+    "0",
+    "0.67",
+    "1",
+    "1"
+  ],
+  "background_transparency": "20",
+  "show_bottom_panel": "True",
+  "show_page_number": "True",
+  "show_prev_button": "True",
+  "qPages": [
+    {
+      "pId": "page1",
+      "show_fullscreen_text": "True",
+      "fullscreen_text": "Hello and welcome the CUSTOM questionnaire.\n\nPlease answer the following question items.\n\nIf you have any questions, feel free to ask the study advisor.",
+      "show_instruction_panel": "True",
+      "instruction_text": "CUSTOM Questionnaire",
+      "qItems": []
+    },
+    {
+      "pId": "page2",
+      "show_fullscreen_text": "False",
+      "fullscreen_text": "",
+      "show_instruction_panel": "True",
+      "instruction_text": "Please choose the most fitting response according to the following statements.",
+      "qItems": [
+        {
+          "qId": "q1",
+          "qType": "linear_scale",
+          "question": "Custom Question 1",
+          "header_name": "Item 1",
+          "mandatory": "True",
+          "options": [
+            {
+              "answer_value": "1",
+              "answer_option": "Strongly\ndisagree"
+            },
+            {
+              "answer_value": "2",
+              "answer_option": "Disagree"
+            },
+            {
+              "answer_value": "3",
+              "answer_option": "Somewhat\ndisagree"
+            },
+            {
+              "answer_value": "4",
+              "answer_option": "Neither agree\nnor disagree"
+            },
+            {
+              "answer_value": "5",
+              "answer_option": "Rather\nagree"
+            },
+            {
+              "answer_value": "6",
+              "answer_option": "Agree"
+            },
+            {
+              "answer_value": "7",
+              "answer_option": "Strongly\nagree"
+            }
+          ]
+        },
+        {
+          "qId": "q2",
+          "qType": "linear_scale",
+          "question": "Custom Question 2",
+          "header_name": "Item 2",
+          "mandatory": "True",
+          "options": [
+            {
+              "answer_value": "1",
+              "answer_option": "Strongly\ndisagree"
+            },
+            {
+              "answer_value": "2",
+              "answer_option": "Disagree"
+            },
+            {
+              "answer_value": "3",
+              "answer_option": "Somewhat\ndisagree"
+            },
+            {
+              "answer_value": "4",
+              "answer_option": "Neither agree\nnor disagree"
+            },
+            {
+              "answer_value": "5",
+              "answer_option": "Rather\nagree"
+            },
+            {
+              "answer_value": "6",
+              "answer_option": "Agree"
+            },
+            {
+              "answer_value": "7",
+              "answer_option": "Strongly\nagree"
+            }
+          ]
+        },
+        {
+          "qId": "q3",
+          "qType": "linear_scale",
+          "question": "Custom Question 3",
+          "header_name": "Item 3",
+          "mandatory": "True",
+          "options": [
+            {
+              "answer_value": "1",
+              "answer_option": "Strongly\ndisagree"
+            },
+            {
+              "answer_value": "2",
+              "answer_option": "Disagree"
+            },
+            {
+              "answer_value": "3",
+              "answer_option": "Somewhat\ndisagree"
+            },
+            {
+              "answer_value": "4",
+              "answer_option": "Neither agree\nnor disagree"
+            },
+            {
+              "answer_value": "5",
+              "answer_option": "Rather\nagree"
+            },
+            {
+              "answer_value": "6",
+              "answer_option": "Agree"
+            },
+            {
+              "answer_value": "7",
+              "answer_option": "Strongly\nagree"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pId": "page3",
+      "show_fullscreen_text": "True",
+      "fullscreen_text": "You have completed the questionnaire.\nPress Finish to submit your responses.\n\nThank you very much for taking part in the experiment! \nWe appreciate your time!",
+      "show_instruction_panel": "True",
+      "instruction_text": "CUSTOM Questionnaire",
+      "qItems": []
+    }
+  ]
+}
