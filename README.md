@@ -1,7 +1,7 @@
 ![app screenshot](mrlabexperimentunity.jpg)
 # Mixed Reality Lab Experiments
 
-This repository contains a Unity project for running controlled experiments in desktop and VR environments. It provides a complete framework for managing experimental conditions, presenting questionnaires, collecting demographic data, handling timing, and logging events and frames.  
+This repository contains an URP compatible Unity project (Unity 6000.3.0f1) running controlled experiments for VR environments. It provides a basic framework for managing experimental conditions, presenting questionnaires, collecting demographic data, handling timing, and logging events and frames.  
 The core logic is implemented in the `ExperimentController` class. :contentReference[oaicite:0]{index=0}
 
 The project is designed so that students can set up studies with minimal onboarding effort.
@@ -98,17 +98,7 @@ VR support is implemented via the Oculus OVR system (Meta Quest).
 5. Logs and questionnaire results will be stored automatically in the persistent application folder. The exact path is printed to the Unity Console during runtime.
 
 The system is modular: conditions, questionnaires, logging logic, and custom variables can be extended independently.
-
----
-
-If you want, I can also generate:
-
-- A Quick Start section for students  
-- A flow diagram  
-- A repository structure graphic  
-- A short version for the GitHub project page  
-
-Just let me know.
+ 
 
 
  
