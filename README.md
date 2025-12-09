@@ -2,7 +2,7 @@
 # Mixed Reality Lab Experiments
 
 This repository contains an URP compatible Unity project (Unity 6000.3.0f1) running controlled experiments for VR environments. It provides a basic framework for managing experimental conditions, presenting questionnaires, collecting demographic data, handling timing, and logging events and frames.  
-The core logic is implemented in the `ExperimentController` class. :contentReference[oaicite:0]{index=0}
+The core logic is implemented in the `ExperimentController` class.
 
 The project is designed so that students can set up studies with minimal onboarding effort.
 
