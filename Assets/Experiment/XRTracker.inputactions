@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "XRTracker",
+    "maps": [
+        {
+            "name": "XRTracker",
+            "id": "e0a5ac0c-a799-457e-a7d6-f7b1e7c5b20a",
+            "actions": [
+                {
+                    "name": "XRTracker",
+                    "type": "Value",
+                    "id": "30528d4c-afae-4777-ba58-48f8c46187ea",
+                    "expectedControlType": "Analog",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4251b547-acc7-4969-8a99-7491a4da3c59",
+                    "path": "<ViveXRTracker>{Ultimate Tracker 0}/isTracked",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "XRTracker",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
