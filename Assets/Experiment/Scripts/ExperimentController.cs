@@ -15,84 +15,84 @@ namespace ExperimentController {
         public enum RecruitmentOption { Student, Staff, FamilyAndFriends, InvitedExternal, Other };
 
         // ---------------------------------------------------------
-        // Demographics (werden im Inspector vor dem Experiment gesetzt)
+        // Demographics (set in Inspector before running the study)
         // ---------------------------------------------------------
         [Header("Demographics")]
-        [Tooltip("Eindeutige ID der Versuchsperson (z. B. laufende Nummer).")]
+        [Tooltip("Unique ID of the participant (for example a running number).")]
         public int SubjectID;
 
-        [Tooltip("Alter der Versuchsperson in Jahren.")]
+        [Tooltip("Age of the participant in years.")]
         public int Age;
 
-        [Tooltip("Geschlecht der Versuchsperson.")]
+        [Tooltip("Gender of the participant.")]
         public GenderOptions Gender;
 
-        [Tooltip("Über welchen Kanal wurde die Versuchsperson rekrutiert?")]
+        [Tooltip("Recruitment channel of the participant.")]
         public RecruitmentOption Recruitment;
 
         // ---------------------------------------------------------
-        // Study Timing (Countown, Condition-Zeit etc.)
+        // Study Timing (countdown, condition duration etc.)
         // ---------------------------------------------------------
         [Header("Study Timing")]
         [TextArea]
-        [Tooltip("Instruktionstext, der vor dem Start des Experiments angezeigt wird.")]
+        [Tooltip("Instruction text shown before the experiment starts.")]
         public string instructionText;
 
-        [Tooltip("Text vor dem Countdown (z. B. 'Das Experiment startet in').")]
+        [Tooltip("Text shown before the countdown (for example 'Experiment starts in').")]
         public string countdownText;
 
-        [Tooltip("UI-Text (TMP) für Instruktionen und Countdown.")]
+        [Tooltip("UI text (TMP) for instructions and countdown.")]
         public TextMeshProUGUI countdownTMP;
 
-        [Tooltip("Wenn aktiv, läuft jede Condition automatisch nach 'conditionTimer' ab.")]
+        [Tooltip("If active, each condition ends automatically after 'conditionTimer'.")]
         public bool useConditionTimer = true;
 
-        [Tooltip("Dauer des Countdowns in Sekunden.")]
+        [Tooltip("Duration of the countdown in seconds.")]
         public float countdownTimer = 3f;
 
-        [Tooltip("Maximale Dauer pro Condition in Sekunden (nur wenn 'useConditionTimer' aktiv ist).")]
+        [Tooltip("Maximum duration per condition in seconds (only if 'useConditionTimer' is active).")]
         public float conditionTimer = 10.0f;
 
         [ReadOnly]
-        [Tooltip("Aktuelle Zeit in der laufenden Condition (Sekunden, nur Anzeige).")]
+        [Tooltip("Current time in the active condition (seconds, display only).")]
         public float conditionTime = 0.0f;
 
         [ReadOnly]
-        [Tooltip("Gesamte bisher vergangene Experimentzeit (Sekunden, nur Anzeige).")]
-        public float experimentTime = 0.0f; 
+        [Tooltip("Total elapsed experiment time (seconds, display only).")]
+        public float experimentTime = 0.0f;
 
         // ---------------------------------------------------------
-        // Study Design (Bedingungen / Conditions)
+        // Study Design (conditions)
         // ---------------------------------------------------------
         [Header("Study Design")]
-        [Tooltip("Name des Experiments (taucht im Log auf).")]
+        [Tooltip("Name of the experiment (appears in logs).")]
         public string experimentName;
 
-        [Tooltip("Alle Conditions (GameObjects), zwischen denen im Experiment umgeschaltet wird.")]
+        [Tooltip("All condition GameObjects that will be activated one at a time.")]
         public GameObject[] conditions;
 
-        [Tooltip("Wie sollen die Conditions für diese Versuchsperson angeordnet werden?")]
+        [Tooltip("How conditions should be sequenced for this participant.")]
         public SequenceOptions ConditionSequence;
 
         // ---------------------------------------------------------
-        // Manuelle Condition-Steuerung
+        // Manual condition override
         // ---------------------------------------------------------
         [Header("Conditions Manual Override")]
-        [Tooltip("Aktuelle Condition-Index (0-basiert). Kann im laufenden Experiment zu Debug-Zwecken angepasst werden.")]
+        [Tooltip("Current condition index (0-based). Can be adjusted for debugging during runtime.")]
         public int currentCondition = 0;
 
         [ReadOnly]
-        [Tooltip("Name der aktuell aktiven Condition (nur Anzeige).")]
+        [Tooltip("Name of the currently active condition (display only).")]
         public string currentConditionName = "";
 
         // ---------------------------------------------------------
         // Questionnaire Toolkit
         // ---------------------------------------------------------
         [Header("Questionnaire Toolkit")]
-        [Tooltip("GameObject mit QTManager-Komponente (Fragebogen-Toolkit).")]
+        [Tooltip("GameObject containing the QTManager component.")]
         public GameObject QTQuestionnaireManager;
 
-        [Tooltip("Canvas, das den Fragebogen enthält (wird zusammen mit dem Fragebogen ein-/ausgeblendet).")]
+        [Tooltip("Canvas containing the questionnaire (shown and hidden together with questionnaires).")]
         public GameObject QTCanvas;
 
         private QTManager qtManager;
@@ -100,61 +100,61 @@ namespace ExperimentController {
         private int currentQuestionnaireNumber = 0;
 
         // ---------------------------------------------------------
-        // interner Ablaufstatus
+        // Internal state
         // ---------------------------------------------------------
         private bool trialRunning = false;
         private bool countdownRunning = false;
         private bool experimentRunning = false;
 
         // ---------------------------------------------------------
-        // Logging (Dateipfade und Writer)
+        // Logging (paths and writers)
         // ---------------------------------------------------------
         [Header("Logging Paths")]
         [ReadOnly]
-        [Tooltip("Absoluter Pfad zum persistenten Datenverzeichnis der Anwendung.")]
+        [Tooltip("Absolute path to the application's persistent data directory.")]
         public string applicationPath = "";
 
-        [Tooltip("Relativer Pfad (vom persistentPath) für Experiment-Logs.")]
+        [Tooltip("Relative path (from persistentPath) for experiment logs.")]
         public string loggingPath = @"Results/Logs/";
 
-        [Tooltip("Relativer Pfad (vom persistentPath) für Fragebogen-Logs.")]
+        [Tooltip("Relative path (from persistentPath) for questionnaire logs.")]
         public string questionnairePath = @"Results/Questionnaires/";
 
-        // Event-Log
-        [Tooltip("Wenn aktiv, werden einzelne Events (Klicks / Hits) in eine CSV-Datei geschrieben.")]
+        // Event log
+        [Tooltip("If active, events (clicks / hits) are logged to a CSV file.")]
         public bool saveEventLog = true;
         private StreamWriter eventLogFileWriter;
 
         [Header("Custom CSV Event Log Items")]
-        [Tooltip("Zusätzliche Variablen, die pro Event ins CSV geschrieben werden (z. B. FPS).")]
+        [Tooltip("Additional variables written per event (for example FPS).")]
         [Reorderable]
         public ReorderableChildList eventLogItems;
 
-        // Frame-Log
-        [Tooltip("Wenn aktiv, wird pro Frame eine Zeile in eine CSV-Datei geschrieben (z. B. Positionen).")]
+        // Frame log
+        [Tooltip("If active, each frame is logged to a CSV file (for example positions).")]
         public bool saveFrameLog = true;
         private StreamWriter frameLogFileWriter;
 
         [Header("Custom CSV Frame Log Items")]
-        [Tooltip("Zusätzliche Variablen, die pro Frame ins CSV geschrieben werden.")]
+        [Tooltip("Additional variables written per frame.")]
         [Reorderable]
         public ReorderableChildList frameLogItems;
 
         // ---------------------------------------------------------
-        // Cache für VR-Controller
+        // Cache for VR controllers
         // ---------------------------------------------------------
         private GameObject ovrRightController;
         private GameObject ovrLeftController;
 
         // ---------------------------------------------------------
-        // Zusatztypen für Custom CSV Items
+        // Types for custom CSV items
         // ---------------------------------------------------------
         [System.Serializable]
         public class AdditionalCsvItem {
-            [Tooltip("Spaltenname im CSV-File.")]
+            [Tooltip("Column name in the CSV file.")]
             public string headerName = "Additional Item";
 
-            [Tooltip("Referenz auf Feld/Eigenschaft/Methode, deren Wert ins CSV geschrieben wird.")]
+            [Tooltip("Reference to field/property/method that will be logged.")]
             [Filter(Fields = true, Properties = true, Methods = true)]
             public UnityMember itemValue;
         }
@@ -163,13 +163,13 @@ namespace ExperimentController {
         public class ReorderableChildList : ReorderableArray<AdditionalCsvItem> { }
 
         // ---------------------------------------------------------
-        // Unity Lifecycle
+        // Unity lifecycle
         // ---------------------------------------------------------
         void Start() {
-            // Zu Beginn alle Conditions deaktivieren
+            // Hide all conditions at startup
             HideConditions();
 
-            // Instruktionstext im Countdown-Textfeld anzeigen
+            // Display instructions in countdown text field
             if (countdownTMP != null) {
                 countdownTMP.SetText(instructionText);
             }
@@ -181,21 +181,21 @@ namespace ExperimentController {
         }
 
         void Update() {
-            // Tastatur-Caching für Lesbarkeit
+            // keyboard shortcut caching
             var keyboard = Keyboard.current;
             var mouse = Mouse.current;
 
-            // Space startet den Countdown (nur wenn Experiment noch nicht läuft)
+            // Space starts countdown when experiment has not started yet
             if (keyboard != null && keyboard.spaceKey.wasPressedThisFrame) {
                 StartCountdown();
                 Debug.Log("Space pressed: starting countdown.");
             }
 
             if (experimentRunning) {
-                // Gesamtzeit des Experiments hochzählen
+                // Count up total experiment time
                 experimentTime += Time.deltaTime;
 
-                // Navigation zwischen Conditions im laufenden Experiment
+                // Navigate between conditions during the experiment
                 if (keyboard != null && keyboard.rightArrowKey.wasPressedThisFrame) {
                     NextCondition();
                 }
@@ -204,19 +204,19 @@ namespace ExperimentController {
                     PreviousCondition();
                 }
 
-                // Trial-Logik und Event-Logging
+                // Trial logic and event logging
                 if (trialRunning) {
                     HandleConditionTiming();
                     HandleEventLogging(mouse);
                     HandleFrameLogging();
                 } else {
-                    // Beispiel-Logik, falls Trigger betätigt wird, ohne dass Trial läuft
+                    // Example: trigger pressed without active trial
                     if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) {
                         Debug.Log("Primary Index Trigger clicked (no active trial).");
                     }
                 }
             } else {
-                // Countdown ablaufen lassen, solange Experiment noch nicht läuft
+                // Run countdown until the experiment starts
                 if (!experimentRunning && countdownRunning) {
                     UpdateCountdown();
                 }
@@ -224,7 +224,7 @@ namespace ExperimentController {
         }
 
         // ---------------------------------------------------------
-        // Initialisierung
+        // Initialization
         // ---------------------------------------------------------
         private void InitializeQuestionnaireToolkit() {
             if (QTQuestionnaireManager != null) {
@@ -233,7 +233,7 @@ namespace ExperimentController {
                 Debug.Log("No questionnaires loaded.");
             }
 
-            // Fragebogen-Canvas zu Beginn ausblenden
+            // Hide questionnaire canvas at startup
             if (QTCanvas != null) {
                 QTCanvas.SetActive(false);
             }
@@ -266,7 +266,7 @@ namespace ExperimentController {
 
             string headerLine = "TimeStamp,ExperimentName,SubjectID,Gender,Age,Recruitment,ConditionName,ConditionSequence,ConditionTime,ExperimentTime,Source,Target";
 
-            // Add custom CSV event log items
+            // add custom CSV event log items
             foreach (var eventItem in eventLogItems) {
                 headerLine += "," + eventItem.headerName;
             }
@@ -281,7 +281,7 @@ namespace ExperimentController {
 
             string headerLine = "TimeStamp,ExperimentName,SubjectID,Gender,Age,Recruitment,ConditionName,ConditionSequence,ConditionTime,ExperimentTime,SourceX,SourceY,SourceZ,TargetX,TargetY,TargetZ";
 
-            // Add custom CSV frame log items
+            // add custom CSV frame log items
             foreach (var frameItem in frameLogItems) {
                 headerLine += "," + frameItem.headerName;
             }
@@ -290,13 +290,13 @@ namespace ExperimentController {
         }
 
         private void CacheControllers() {
-            // VR-Controller-Anker im Szenengraph cachen (falls vorhanden)
+            // Cache VR controller anchors in the scene graph
             ovrRightController = GameObject.Find("RightHandAnchor");
             ovrLeftController = GameObject.Find("LeftHandAnchor");
         }
 
         private void ApplyConditionSequence() {
-            // Reihenfolge der Conditions je nach Studiendesign festlegen
+            // Determine condition order based on study design
             switch (ConditionSequence) {
                 case SequenceOptions.BalancedLatinSquare:
                     conditions = GetBalancedLatinSquare(conditions, SubjectID);
@@ -321,7 +321,7 @@ namespace ExperimentController {
         }
 
         // ---------------------------------------------------------
-        // Countdown und Condition-Steuerung
+        // Countdown and condition control
         // ---------------------------------------------------------
         private void StartCountdown() {
             if (!experimentRunning && !countdownRunning) {
@@ -349,10 +349,10 @@ namespace ExperimentController {
         }
 
         private void HandleConditionTiming() {
-            // Zeit für die aktuelle Condition hochzählen
+            // Increment condition time
             conditionTime += Time.deltaTime;
 
-            // Wenn Timer abgelaufen ist, Condition beenden
+            // End condition when timer expires
             if (useConditionTimer && conditionTime > conditionTimer) {
                 Debug.Log("Condition stopped (timer reached).");
 
@@ -369,7 +369,7 @@ namespace ExperimentController {
                 return;
             }
 
-            // Maus-Klick Logging
+            // Mouse click logging
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) {
                 if (Camera.main != null) {
                     Vector2 mousePos = mouse.position.ReadValue();
@@ -383,7 +383,7 @@ namespace ExperimentController {
                 }
             }
 
-            // VR-Controller Logging
+            // VR controller logging
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) {
                 HandleControllerRaycast(ovrRightController);
                 HandleControllerRaycast(ovrLeftController);
@@ -409,13 +409,11 @@ namespace ExperimentController {
                 return;
             }
 
-            // Hier könnte pro Frame geloggt werden
-            // Beispiel:
-            // LogFrame(ovrLeftController, someTargetGameObject);
+            // Placeholder: extend with your own frame logging logic
         }
 
         // ---------------------------------------------------------
-        // Öffentliche Getter (z. B. für andere Komponenten)
+        // Public getters
         // ---------------------------------------------------------
         public string GetCurrentConditionName() {
             return currentConditionName;
@@ -441,13 +439,13 @@ namespace ExperimentController {
             return Recruitment.ToString();
         }
 
-        // Beispiel-Methode für Custom CSV-Item
+        // Example method for custom CSV item
         public string getFPS() {
             return (1f / Time.unscaledDeltaTime).ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         // ---------------------------------------------------------
-        // Fragebögen
+        // Questionnaires
         // ---------------------------------------------------------
         public void NextQuestionnaire() {
             if (QTQuestionnaireManager == null || qtManager == null) {
@@ -456,7 +454,7 @@ namespace ExperimentController {
 
             Debug.Log("Showing next questionnaire...");
 
-            // aktuellen Fragebogen schließen
+            // close current questionnaire
             if (qtQManager != null) {
                 qtQManager.HideQuestionnaire();
             }
@@ -472,7 +470,7 @@ namespace ExperimentController {
             qtQManager.resultsSavePath = "/" + questionnairePath.TrimStart('/').TrimEnd('/') + "/";
             qtQManager.StartQuestionnaire();
 
-            // Canvas bleibt an, solange Fragebögen angezeigt werden
+            // keep canvas visible while questionnaires are shown
             if (QTCanvas != null) {
                 QTCanvas.SetActive(true);
             }
@@ -492,14 +490,14 @@ namespace ExperimentController {
             qtQManager.resultsSavePath = "/" + questionnairePath.TrimStart('/').TrimEnd('/') + "/";
             qtQManager.StartQuestionnaire();
 
-            // Fragebogen-Canvas anzeigen
+            // show questionnaire canvas
             if (QTCanvas != null) {
                 QTCanvas.SetActive(true);
             }
         }
 
         // ---------------------------------------------------------
-        // Condition wechseln
+        // Condition switching
         // ---------------------------------------------------------
         private void PreviousCondition() {
             if (currentCondition > 0) {
@@ -509,7 +507,7 @@ namespace ExperimentController {
         }
 
         private void ShowCondition(int sequenceID) {
-            // Condition starten
+            // start condition
             conditionTime = 0f;
             experimentRunning = true;
             trialRunning = true;
@@ -538,8 +536,7 @@ namespace ExperimentController {
                       " | Current Condition: " + sequenceID +
                       " | Condition Name: " + currentConditionName);
 
-            // Falls ein Fragebogen-Canvas existiert, sicherheitshalber ausblenden,
-            // da wir jetzt wieder in einer Condition sind.
+            // hide questionnaire canvas when entering a new condition
             if (QTCanvas != null) {
                 QTCanvas.SetActive(false);
             }
@@ -562,7 +559,7 @@ namespace ExperimentController {
 
         public void NextCondition() {
             if (QTQuestionnaireManager != null && qtManager != null) {
-                // alle Fragebögen zurücksetzen und verstecken
+                // reset and hide all questionnaires
                 foreach (var questionnaire in qtManager.questionnaires) {
                     questionnaire.ResetQuestionnaire();
                     questionnaire.HideQuestionnaire();
@@ -571,7 +568,7 @@ namespace ExperimentController {
                 currentQuestionnaireNumber = 0;
             }
 
-            // Fragebogen-Canvas ausblenden, wir gehen in eine neue Condition
+            // hide questionnaire canvas; we enter a new condition
             if (QTCanvas != null) {
                 QTCanvas.SetActive(false);
             }
@@ -680,7 +677,7 @@ namespace ExperimentController {
         }
 
         // ---------------------------------------------------------
-        // Sequenzfunktionen (Latin Square, Permutationen, Shuffle)
+        // Sequence functions (Latin Square, permutations, shuffle)
         // ---------------------------------------------------------
         public static T[] GetBalancedLatinSquare<T>(T[] array, int participant) {
             List<T> result = new List<T>();
@@ -809,7 +806,7 @@ namespace ExperimentController {
     }
 
     // ---------------------------------------------------------
-    // Inspector Attribute für ReadOnly-Felder
+    // Inspector attribute for read-only fields
     // ---------------------------------------------------------
     public class ReadOnlyAttribute : PropertyAttribute { }
     public class ShowOnlyAttribute : PropertyAttribute { }
