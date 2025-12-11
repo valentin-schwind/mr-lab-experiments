@@ -1,3 +1,4 @@
+using InspectorTools;
 using QuestionnaireToolkit.Scripts;
 using QuestionnaireToolkit.Scripts.MemberReflection.Reflection;
 using System.Collections.Generic;
@@ -9,10 +10,23 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace ExperimentController {
+    public interface ITaskController {
+        void BeginCondition(ExperimentController controller);
+        bool IsConditionComplete();
+
+        void hide();
+        void show();
+
+        // Called by ExperimentController when a response (click/trigger) occurs
+        void RegisterResponse();
+    }
+
+
     public class ExperimentController : MonoBehaviour {
         public enum SequenceOptions { BalancedLatinSquare, LatinSquare, Permutations, ShuffleBySeed, Shuffle };
         public enum GenderOptions { Male, Female, Other, DoNotWantToSpecify };
         public enum RecruitmentOption { Student, Staff, FamilyAndFriends, InvitedExternal, Other };
+        public enum ConditionEndMode { ConditionTimer, TaskController }
 
         // ---------------------------------------------------------
         // Demographics (set in Inspector before running the study)
@@ -45,21 +59,47 @@ namespace ExperimentController {
         public TextMeshProUGUI countdownTMP;
 
         [Tooltip("If active, each condition ends automatically after 'conditionTimer'.")]
+        [HideInInspector]
         public bool useConditionTimer = true;
 
         [Tooltip("Duration of the countdown in seconds.")]
         public float countdownTimer = 3f;
 
         [Tooltip("Maximum duration per condition in seconds (only if 'useConditionTimer' is active).")]
+        [DisableIf("conditionEndMode", ConditionEndMode.TaskController)]
         public float conditionTimer = 10.0f;
 
         [ReadOnly]
         [Tooltip("Current time in the active condition (seconds, display only).")]
+        [HideInInspector]
         public float conditionTime = 0.0f;
 
         [ReadOnly]
         [Tooltip("Total elapsed experiment time (seconds, display only).")]
+        [HideInInspector]
         public float experimentTime = 0.0f;
+
+        // ---------------------------------------------------------
+        // Condition end logic
+        // ---------------------------------------------------------
+        [Header("Condition End")]
+        [Tooltip("Defines how each condition ends: either after a fixed duration or when a task controller reports completion.")]
+        public ConditionEndMode conditionEndMode = ConditionEndMode.ConditionTimer;
+
+        // ---------------------------------------------------------
+        // Task Controller (optional, global für alle Conditions)
+        // ---------------------------------------------------------
+        [Header("Task Controller")]
+        [Tooltip("When active, the TaskController determines, when a condition ends.")]
+        [HideInInspector]
+        public bool useTaskController = false;
+
+        [Tooltip("MonoBehaviour, that implements ITaskController (isConditionComplete).")]
+        [DisableIf("conditionEndMode", ConditionEndMode.ConditionTimer)]
+        public MonoBehaviour taskControllerObject;
+
+        private ITaskController taskController;
+
 
         // ---------------------------------------------------------
         // Study Design (conditions)
@@ -166,6 +206,10 @@ namespace ExperimentController {
         // Unity lifecycle
         // ---------------------------------------------------------
         void Start() {
+            // Map condition end mode to legacy flags
+            useConditionTimer = (conditionEndMode == ConditionEndMode.ConditionTimer);
+            useTaskController = (conditionEndMode == ConditionEndMode.TaskController);
+
             // Hide all conditions at startup
             HideConditions();
 
@@ -178,7 +222,23 @@ namespace ExperimentController {
             InitializePathsAndLogging();
             CacheControllers();
             ApplyConditionSequence();
+
+            // Initialize TaskController (only if mode is TaskController)
+            if (useTaskController) {
+                if (taskControllerObject != null) {
+                    taskController = taskControllerObject as ITaskController;
+                    if (taskController == null) {
+                        Debug.LogError("taskControllerObject does not implement ITaskController.");
+                    } else {
+                        Debug.Log("TaskController successfully bound: " + taskControllerObject.GetType().Name);
+                        taskController.hide();
+                    }
+                } else {
+                    Debug.LogWarning("ConditionEndMode is TaskController, but taskControllerObject is not assigned.");
+                }
+            }
         }
+
 
         void Update() {
             // keyboard shortcut caching
@@ -206,7 +266,35 @@ namespace ExperimentController {
 
                 // Trial logic and event logging
                 if (trialRunning) {
-                    HandleConditionTiming();
+
+                    bool conditionFinished = false;
+
+                    if (useTaskController && taskController != null) {
+                        taskController.show();
+
+                        // TaskController entscheidet
+                        if (taskController.IsConditionComplete()) {
+                            Debug.Log("TaskController meldet: Condition fertig.");
+                            conditionFinished = true;
+                        }
+                    } else {
+                        HandleConditionTiming();
+                        // HandleConditionTiming ruft selbst NextCondition/ShowQuestionnaire auf, falls der Timer abläuft
+                    }
+
+                    if (conditionFinished) {
+                        trialRunning = false;
+
+                        if (QTQuestionnaireManager != null) {
+                            ShowQuestionnaire();
+                        } else {
+                            NextCondition();
+                        }
+
+                        // diesen Frame abbrechen
+                        return;
+                    }
+
                     HandleEventLogging(mouse);
                     HandleFrameLogging();
                 } else {
@@ -216,11 +304,15 @@ namespace ExperimentController {
                     }
                 }
             } else {
-                // Run countdown until the experiment starts
-                if (!experimentRunning && countdownRunning) {
+                // Countdown läuft nur, solange das Experiment noch nicht gestartet wurde
+                if (countdownRunning && !experimentRunning) {
                     UpdateCountdown();
+                    if (taskController != null) {
+                        taskController.hide();
+                    }
                 }
             }
+
         }
 
         // ---------------------------------------------------------
@@ -371,6 +463,12 @@ namespace ExperimentController {
 
             // Mouse click logging
             if (mouse != null && mouse.leftButton.wasPressedThisFrame) {
+
+                // First let the task controller process the response (if active)
+                if (useTaskController && taskController != null) {
+                    taskController.RegisterResponse();
+                }
+
                 if (Camera.main != null) {
                     Vector2 mousePos = mouse.position.ReadValue();
                     Ray ray = Camera.main.ScreenPointToRay(mousePos);
@@ -385,10 +483,17 @@ namespace ExperimentController {
 
             // VR controller logging
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) {
+
+                // First let the task controller process the response (if active)
+                if (useTaskController && taskController != null) {
+                    taskController.RegisterResponse();
+                }
+
                 HandleControllerRaycast(ovrRightController);
                 HandleControllerRaycast(ovrLeftController);
             }
         }
+
 
         private void HandleControllerRaycast(GameObject controller) {
             if (controller == null) {
@@ -536,10 +641,17 @@ namespace ExperimentController {
                       " | Current Condition: " + sequenceID +
                       " | Condition Name: " + currentConditionName);
 
+            // Task für diese Condition neu starten
+            if (useTaskController && taskController != null) {
+                Debug.Log("TaskController.BeginCondition für Condition: " + currentConditionName);
+                taskController.BeginCondition(this);
+            }
+
             // hide questionnaire canvas when entering a new condition
             if (QTCanvas != null) {
                 QTCanvas.SetActive(false);
             }
+
         }
 
         private void HideConditions() {
@@ -618,8 +730,8 @@ namespace ExperimentController {
                 Gender + "," +
                 Age + "," +
                 Recruitment + "," +
-                currentCondition + "," +
                 currentConditionName + "," +
+                currentCondition + "," +
                 conditionTime.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
                 experimentTime.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
                 source.name + "," +
