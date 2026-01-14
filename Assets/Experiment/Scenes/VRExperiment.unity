@@ -11120,7 +11120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17258,7 +17258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -37034,7 +37034,7 @@ MonoBehaviour:
         _target: {fileID: 260144167}
         _component: ExperimentController
         _name: experimentTime
-  pageBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  pageBackgroundColor: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   pageBottomColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 0.3137255, g: 0.4745098, b: 0.7372549, a: 1}
   running: 0
@@ -38833,7 +38833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -49664,7 +49664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -51879,7 +51879,7 @@ MonoBehaviour:
         _target: {fileID: 260144167}
         _component: ExperimentController
         _name: experimentTime
-  pageBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  pageBackgroundColor: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   pageBottomColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 0.3137255, g: 0.4745098, b: 0.7372549, a: 1}
   running: 0
@@ -65831,7 +65831,7 @@ MonoBehaviour:
   - {fileID: 1575314155}
   - {fileID: 1018204182}
   - {fileID: 729784958}
-  pageBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  pageBackgroundColor: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   pageBottomColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 0.3137255, g: 0.4745098, b: 0.7372549, a: 1}
   selectedQuestionnaire: 2
@@ -67079,11 +67079,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32bb72d92f1a4a745a19dd611de656e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  mastTransform: {fileID: 1894682835}
+  targetObjectTransform: {fileID: 2056444872}
   pointingTransform: {fileID: 1693043725}
-  responseButton: 8192
-  allowMouseInput: 1
+  numberOfAngles: 16
+  repetitionsPerAngle: 1
+  trialOrderMode: 2
   interTrialInterval: 0.5
+  taskDescription: Point to the direction where the wind comes from...
+  taskDescriptionTMP: {fileID: 1081729444}
+  taskCanvas: {fileID: 1121181718}
 --- !u!4 &1312849006
 Transform:
   m_ObjectHideFlags: 0
@@ -67365,7 +67369,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -69269,7 +69273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -71706,7 +71710,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -77737,7 +77741,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -79101,7 +79105,7 @@ MonoBehaviour:
         _target: {fileID: 260144167}
         _component: ExperimentController
         _name: experimentTime
-  pageBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  pageBackgroundColor: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   pageBottomColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 0.3137255, g: 0.4745098, b: 0.7372549, a: 1}
   running: 0
@@ -101855,7 +101859,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8553459, g: 0.8553459, b: 0.8553459, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

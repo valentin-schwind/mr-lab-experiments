@@ -1917,7 +1917,7 @@ namespace QuestionnaireToolkit.Editor {
 				boxBackground.border = new RectOffset(6, 3, 3, 6);
 				preButton = new GUIStyle("RL FooterButton");
 
-				expandButton = EditorGUIUtility.IconContent("winbtn_win_max");
+				expandButton = EditorGUIUtility.IconContent("winbtn_win_min");
 				expandButton.tooltip = "Expand All Elements";
 
 				collapseButton = EditorGUIUtility.IconContent("winbtn_win_min");

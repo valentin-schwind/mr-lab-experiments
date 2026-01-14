@@ -274,7 +274,7 @@ namespace ExperimentController {
 
                         // TaskController entscheidet
                         if (taskController.IsConditionComplete()) {
-                            Debug.Log("TaskController meldet: Condition fertig.");
+                            Debug.Log("TaskController responded: Condition finished.");
                             conditionFinished = true;
                         }
                     } else {

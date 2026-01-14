@@ -1,8 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 namespace ExperimentController {
-    public class YawRotationTaskController : MonoBehaviour, ITaskController {
+    public class YawRotationTaskController : MonoBehaviour, ITaskController { 
+
+        public enum TrialOrderMode {
+            InOrder,                  // no shuffling
+            ShuffleAllAnglesByHash,   // shuffle distinct angles, then repeat in that order
+            ShuffleAllTrialsByHash // create all trials (with repetitions) and shuffle globally
+        }
 
         [Header("Task Setup")]
         [Tooltip("Transform of an object that will be rotated.")]
@@ -11,23 +18,37 @@ namespace ExperimentController {
         [Tooltip("Transform whose Y-axis direction is interpreted as the participant's response (e.g., RightHandAnchor or CenterEyeAnchor).")]
         public Transform pointingTransform;
 
-        [Tooltip("OVR button used by the participant to confirm their response.")]
-        public OVRInput.Button responseButton = OVRInput.Button.PrimaryIndexTrigger;
+        [Header("Trial Configuration")]
+        [Tooltip("Number of distinct angles that divide the full 360 degrees.")]
+        public int numberOfAngles = 16;
 
-        [Tooltip("If enabled, a left mouse click can also trigger a response.")]
-        public bool allowMouseInput = false;
+        [Tooltip("Number of repetitions per angle.")]
+        public int repetitionsPerAngle = 1;
+
+        [Tooltip("Defines how the trial sequence is ordered and shuffled.")]
+        public TrialOrderMode trialOrderMode = TrialOrderMode.ShuffleAllTrialsByHash;
 
         [Tooltip("Delay between two trials in seconds.")]
         public float interTrialInterval = 0.5f;
 
+        [Header("Task Description UI")]
+        [TextArea]
+        [Tooltip("Description of the task shown to the participant before or during the trials.")]
+        public string taskDescription;
+
+        [Tooltip("Optional TMP text object used to display the task description.")]
+        public TextMeshProUGUI taskDescriptionTMP;
+
+        [Tooltip("Canvas that contains the task UI elements (e.g., task description text).")]
+        public GameObject taskCanvas;
 
 
         // Reference to ExperimentController
         private ExperimentController experimentController;
 
         // Trial data
-        private float[] trialAngles;          // 16 angles (22.5-degree steps), shuffled by SubjectID
-        private int currentTrialIndex = -1;   // -1 before start, 0..15 during trials
+        private float[] trialAngles;          // all trial angles (expanded + shuffled)
+        private int currentTrialIndex = -1;   // -1 before start, 0..N-1 during trials
 
         // State
         private bool waitingForResponse = false;
@@ -50,7 +71,17 @@ namespace ExperimentController {
 
             Debug.Log("[YawRotationTask] BeginCondition called.");
 
-            // Ensure mast is visible at the start of a new condition
+            // Show UI canvas (if assigned)
+            if (taskCanvas != null) {
+                taskCanvas.SetActive(true);
+            }
+
+            // Show / update task description text (if assigned)
+            if (taskDescriptionTMP != null) {
+                taskDescriptionTMP.SetText(taskDescription);
+            }
+
+            // Ensure target object is visible at the start of a new condition
             if (targetObjectTransform != null) {
                 targetObjectTransform.gameObject.SetActive(true);
             }
@@ -64,16 +95,8 @@ namespace ExperimentController {
             StartNextTrial();
         }
 
-
         public bool IsConditionComplete() {
             return conditionComplete;
-        }
-
-        // ---------------------------------------------------------
-        // Unity
-        // ---------------------------------------------------------
-        void Update() {
-            // No input polling here – input is handled centrally in ExperimentController.
         }
 
         public void RegisterResponse() {
@@ -84,40 +107,148 @@ namespace ExperimentController {
             OnResponse();
         }
 
+        public void hide() {
+            gameObject.SetActive(false);
+        }
+
+        public void show() {
+            gameObject.SetActive(true);
+        }
+
+        // ---------------------------------------------------------
+        // Unity
+        // ---------------------------------------------------------
+        void Update() {
+            // No input polling here – input is handled centrally in ExperimentController.
+        }
+
+        // ---------------------------------------------------------
+        // Condition end (centralized)
+        // ---------------------------------------------------------
+        private void EndCondition() {
+            Debug.Log("[YawRotationTask] EndCondition called.");
+
+            conditionComplete = true;
+            conditionActive = false;
+            waitingForResponse = false;
+
+            // Hide target object
+            if (targetObjectTransform != null) {
+                targetObjectTransform.gameObject.SetActive(false);
+            }
+
+            // Hide task UI
+            if (taskCanvas != null) {
+                taskCanvas.SetActive(false);
+            }
+
+            // Optional: hide TMP explicitly, falls nicht im Canvas
+            if (taskDescriptionTMP != null && taskDescriptionTMP.gameObject != taskCanvas) {
+                taskDescriptionTMP.gameObject.SetActive(false);
+            }
+        }
 
         // ---------------------------------------------------------
         // Trial Setup
         // ---------------------------------------------------------
         private void InitTrials() {
-            // 16 angles: 0..360 in 22.5-degree increments
-            trialAngles = new float[16];
-            for (int i = 0; i < 16; i++) {
-                trialAngles[i] = i * 22.5f;
+            // Safety clamps
+            if (numberOfAngles < 1) {
+                numberOfAngles = 1;
+            }
+
+            if (repetitionsPerAngle < 1) {
+                repetitionsPerAngle = 1;
+            }
+
+            // Base angles: 0..360 in equal steps
+            float step = 360f / numberOfAngles;
+            float[] baseAngles = new float[numberOfAngles];
+
+            for (int i = 0; i < numberOfAngles; i++) {
+                baseAngles[i] = i * step;
             }
 
             int subjectId = experimentController != null ? experimentController.GetSubjectID() : 0;
+            int conditionId = experimentController != null ? experimentController.GetCurrentCondition() : 0;
+            int subjectConditionHash = System.HashCode.Combine(subjectId, conditionId);
 
-            // Shuffle using SubjectID as random seed
-            trialAngles = ExperimentController.Shuffle(trialAngles, subjectId);
+            // Build trialAngles according to order mode and repetitions
+            switch (trialOrderMode) {
+                case TrialOrderMode.InOrder:
+                    trialAngles = BuildTrialsInOrder(baseAngles);
+                    break;
+
+                case TrialOrderMode.ShuffleAllAnglesByHash:
+                    trialAngles = BuildTrialsShuffleAngles(baseAngles, subjectConditionHash);
+                    break;
+
+                case TrialOrderMode.ShuffleAllTrialsByHash:
+                    trialAngles = BuildTrialsShuffleAll(baseAngles, subjectConditionHash);
+                    break;
+            }
 
             Debug.Log("[YawRotationTask] Trials initialized with SubjectID " + subjectId +
-                      ". Order: " + string.Join(", ", trialAngles));
+                      " | numberOfAngles=" + numberOfAngles +
+                      " | repetitionsPerAngle=" + repetitionsPerAngle +
+                      " | totalTrials=" + trialAngles.Length +
+                      " | mode=" + trialOrderMode +
+                      " | order: " + string.Join(", ", trialAngles));
+        }
+
+        private float[] BuildTrialsInOrder(float[] baseAngles) {
+            int totalTrials = baseAngles.Length * repetitionsPerAngle;
+            float[] trials = new float[totalTrials];
+
+            int idx = 0;
+            for (int r = 0; r < repetitionsPerAngle; r++) {
+                for (int i = 0; i < baseAngles.Length; i++) {
+                    trials[idx++] = baseAngles[i];
+                }
+            }
+
+            return trials;
+        }
+
+        private float[] BuildTrialsShuffleAngles(float[] baseAngles, int subjectId) {
+            // Shuffle the distinct angles once by subject
+            float[] shuffledAngles = ExperimentController.Shuffle((float[])baseAngles.Clone(), subjectId);
+
+            int totalTrials = shuffledAngles.Length * repetitionsPerAngle;
+            float[] trials = new float[totalTrials];
+
+            int idx = 0;
+            for (int r = 0; r < repetitionsPerAngle; r++) {
+                for (int i = 0; i < shuffledAngles.Length; i++) {
+                    trials[idx++] = shuffledAngles[i];
+                }
+            }
+
+            return trials;
+        }
+
+        private float[] BuildTrialsShuffleAll(float[] baseAngles, int subjectId) {
+            // First create the full expanded list in deterministic order
+            int totalTrials = baseAngles.Length * repetitionsPerAngle;
+            float[] trials = new float[totalTrials];
+
+            int idx = 0;
+            for (int r = 0; r < repetitionsPerAngle; r++) {
+                for (int i = 0; i < baseAngles.Length; i++) {
+                    trials[idx++] = baseAngles[i];
+                }
+            }
+
+            // Then shuffle all trials using the subject seed
+            trials = ExperimentController.Shuffle(trials, subjectId);
+            return trials;
         }
 
         private void StartNextTrial() {
             currentTrialIndex++;
 
             if (currentTrialIndex >= trialAngles.Length) {
-                Debug.Log("[YawRotationTask] All trials completed.");
-                conditionComplete = true;
-                waitingForResponse = false;
-                conditionActive = false;
-
-                // Hide mast after all trials are finished
-                if (targetObjectTransform != null) {
-                    targetObjectTransform.gameObject.SetActive(false);
-                }
-
+                EndCondition();
                 return;
             }
 
@@ -134,7 +265,6 @@ namespace ExperimentController {
             Debug.Log("[YawRotationTask] Trial " + currentTrialIndex +
                       " started. Target angle (Y): " + angle + " degrees.");
         }
-
 
         // ---------------------------------------------------------
         // Response Handling
@@ -168,33 +298,30 @@ namespace ExperimentController {
         // ---------------------------------------------------------
         // Public Getters for ExperimentController / Logging
         // ---------------------------------------------------------
-         
+
+        // 1) Trial index (0-based as string)
         public string GetCurrentTrialIndex() {
             return currentTrialIndex.ToString();
-        } 
+        }
 
+        // 2) Trial name – based on angle label
         public string GetCurrentTrialName() {
             return "Yaw_" + lastTargetAngle.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
         }
-         
+
+        // 3) Participant pointing direction (Y-axis)
         public string GetCurrentPointingDirectionY() {
             return lastParticipantDirection.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
-         
+
+        // 4) Angular deviation (signed degrees)
         public string GetCurrentAngularError() {
             return lastAngularError.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
-         
+
+        // 5) Reaction time in seconds since trial start
         public string GetCurrentReactionTime() {
             return lastReactionTime.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        public void hide() {
-            this.gameObject.SetActive(false);
-        }
-
-        public void show() {
-            this.gameObject.SetActive(true);
         }
     }
 }
